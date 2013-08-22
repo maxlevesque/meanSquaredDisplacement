@@ -5,7 +5,6 @@
 program meanSquaredDisplacement
 
     implicit none
-    character(len("traj.in")) :: trajectoryFileName = "traj.in"
     character(len("msd.out")) :: outputFile = "msd.out"
     integer :: Nat
     integer :: i, nbTimeStepsInTraj, iostat, dt, t, nline, nt
@@ -22,7 +21,6 @@ program meanSquaredDisplacement
         stop "Argument retrieval failed. You should execute the program with the number of atoms as argument, e.g. in ./msd 10 "
     end if
     read(arg,*) Nat
-    print*, Nat*2
 
     call get_command_argument(2,arg,status=i)
     if( i < 0 ) then
@@ -30,10 +28,8 @@ program meanSquaredDisplacement
     else if ( i > 0 ) then
         stop "Argument retrieval failed. You should execute the program with the number of atoms as argument, e.g. in ./msd 10 "
     end if
-    print*, trim(adjustl(arg))
+    trajectoryFileName = trim(adjustl(arg))
 
-    
-STOP    
     
     call opentraj
     ! computes the number of lines in traj.in and deduces the number of timesteps
@@ -64,7 +60,7 @@ STOP
     do dt = 1, nbTimeStepsInTraj-1
         nt = nbTimeStepsInTraj-dt
         do t = 1, nt
-            msd(dt) = msd(dt) +sum(  (r(:,t,x)-r(:,t+dt,x))**2 + (r(:,t,x)-r(:,t+dt,y))**2 + (r(:,t,x)-r(:,t+dt,z))**2   )/dble(Nat) ! average over sites i
+            msd(dt) = msd(dt) +sum(  (r(:,t,x)-r(:,t+dt,x))**2 + (r(:,t,y)-r(:,t+dt,y))**2 + (r(:,t,z)-r(:,t+dt,z))**2   )/dble(Nat) ! average over sites i
         end do
         msd(dt) = msd(dt) /dble(nt) ! average over reference time t
         write(11,*) dt, msd(dt)

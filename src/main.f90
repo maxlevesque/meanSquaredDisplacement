@@ -46,34 +46,34 @@ program meanSquaredDisplacement
         do t = 1, nt
             tmp = 0.d0
             do i = 1, Nat
-                tmp = tmp + min(    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,ly,lz] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,ly,0.d0] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,ly,-lz] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,lz] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,0.d0] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,-lz])   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,lz] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,0.d0] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,-lz])  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,lz] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,0.d0] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,-lz])   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,lz] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,0.d0] )   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,-lz])   ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,lz] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,0.d0] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,-lz])  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,lz] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,0.d0] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,-lz])  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,lz] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,0.d0] )  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,-lz])  ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,lz] ) ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,0.d0] ) ,&
-                                    norm2( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,-lz])  &
-                                )**2
+                tmp = tmp + min(    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,ly,lz] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,ly,0.d0] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,ly,-lz] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,lz] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,0.d0] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,-lz])**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,lz] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,0.d0] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,-lz])**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,lz] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,0.d0] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,-lz])**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,lz] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,0.d0] )**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,-lz])**2)   ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,lz] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,0.d0] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,-lz])**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,lz] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,0.d0] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,-lz])**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,lz] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,0.d0] )**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,-lz])**2)  ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,lz] )**2) ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,0.d0] )**2) ,&
+                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,-lz])**2)  &
+                                )
             end do
             msd(dt) = msd(dt) + tmp/dble(Nat)
 !~             sum(  (r(:,t,x)-r(:,t+dt,x))**2 + (r(:,t,y)-r(:,t+dt,y))**2 + (r(:,t,z)-r(:,t+dt,z))**2   )/dble(Nat) ! average over sites i

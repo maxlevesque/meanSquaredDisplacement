@@ -10,6 +10,7 @@ program meanSquaredDisplacement
     integer :: i, nbTimeStepsInTraj, iostat, dt, t, nt, d
     integer, parameter :: x=1, y=2, z=3
     double precision, dimension(:,:,:), allocatable :: r ! position of site i at timestep t
+    double precision, dimension(:,:), allocatable :: ri
     double precision :: tmp, lx, ly, lz, diffx, diffy, diffz, rc, tmpp, dx2, dy2, dz2, r0, r1, time1, time0
     double precision, dimension(:), allocatable :: msd
     character(len=300) :: arg, trajectoryFileName
@@ -64,22 +65,39 @@ program meanSquaredDisplacement
     ! MSD(t) will be written in file unit 11
     open(11,file=outputfile)
 
-    ! compute msd(dt)= <min{|r_i(t)-r_i(t+dt)|}_{PBC(r_i(t+dt))}²>_{i,t}
-    msd=0.d0
+!~     ! compute msd(dt)= <min{|r_i(t)-r_i(t+dt)|}_{PBC(r_i(t+dt))}²>_{i,t}
+!~     msd=0.d0
+!~     do dt = 1, nbTimeStepsInTraj-1
+!~         if( dt == 1) then
+!~             call cpu_time(time0)
+!~         else if( dt == 2) then
+!~             call cpu_time(time1)
+!~             print '("Estimated time before end = ",f8.0," mins.")',(time1-time0)*dble(nbTimeStepsInTraj)/60.d0
+!~         else if( mod(dt,10)==0 ) then
+!~             print*,"Compute MSD of dt = ",dt," over ",nbTimeStepsInTraj-1
+!~         end if
+!~         nt = nbTimeStepsInTraj-dt
+!~         msd(dt) = sum(     (r(:,1:nt,:) - r(:,dt:nt+dt,:))**2         ) /(dble(Nat)*dble(nt))
+!~         write(11,*) dt, msd(dt)
+!~     end do
+
+    allocate(ri(nbTimeStepsInTraj,x:z), source=0.d0)
+    msd = 0.d0
+    do i= 1, Nat
+        ri = r(i,:,:)
+        do dt = 1, nbTimeStepsInTraj-1
+            nt = nbTimeStepsInTraj-dt
+            msd(dt) = msd(dt) + sum( (ri(1:nt,:) - ri(dt:nt+dt,:))**2 ) /dble(nt)
+        end do
+    end do
+    msd = msd/dble(Nat)
+    deallocate(r,ri)
+
     do dt = 1, nbTimeStepsInTraj-1
-        if( dt == 1) then
-            call cpu_time(time0)
-        else if( dt == 2) then
-            call cpu_time(time1)
-            print '("Estimated time before end = ",f8.0," mins.")',(time1-time0)*dble(nbTimeStepsInTraj)/60.d0
-        else if( mod(dt,10)==0 ) then
-            print*,"Compute MSD of dt = ",dt," over ",nbTimeStepsInTraj-1
-        end if
-        nt = nbTimeStepsInTraj-dt
-        msd(dt) = sum(     (r(:,1:nt,:) - r(:,dt:nt+dt,:))**2         ) /(dble(Nat)*dble(nt))
         write(11,*) dt, msd(dt)
     end do
-    
+
+
     contains
 
     subroutine opentraj

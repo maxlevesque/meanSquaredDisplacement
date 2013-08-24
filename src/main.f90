@@ -10,10 +10,9 @@ program meanSquaredDisplacement
     integer :: i, nbTimeStepsInTraj, iostat, dt, t, nt, d
     integer, parameter :: x=1, y=2, z=3
     double precision, dimension(:,:,:), allocatable :: r ! position of site i at timestep t
-    double precision :: tmp, lx, ly, lz, diffx, diffy, diffz, rc, tmpp, dx2, dy2, dz2, r0, r1
+    double precision :: tmp, lx, ly, lz, diffx, diffy, diffz, rc, tmpp, dx2, dy2, dz2, r0, r1, time1, time0
     double precision, dimension(:), allocatable :: msd
     character(len=300) :: arg, trajectoryFileName
-    double precision, dimension(:,:), allocatable :: rtmp
     double precision, dimension(x:z) :: l
     logical :: doagain
 
@@ -31,11 +30,10 @@ program meanSquaredDisplacement
         
     ! read positions of all sites i at all timesteps t
     allocate( r(Nat,nbTimeStepsInTraj,x:z) )
-    allocate( rtmp(Nat,x:z) )
     call opentraj
     l(x:z) = [lx, ly, lz]
     do t = 1, nbTimeStepsInTraj
-        print*,"Reading and unfolding timestep ",t," over ",nbTimeStepsInTraj
+        if( mod(t,10)==0 ) print*,"Reading and unfolding timestep ",t," over ",nbTimeStepsInTraj
         do i = 1, Nat
             read(10,*) r(i,t,x), r(i,t,y), r(i,t,z)
             if( t > 1 .and. t < nbTimeStepsInTraj ) then
@@ -66,21 +64,19 @@ program meanSquaredDisplacement
     ! MSD(t) will be written in file unit 11
     open(11,file=outputfile)
 
-    rc = (lx**2+ly**2+lz**2)/4.d0
     ! compute msd(dt)= <min{|r_i(t)-r_i(t+dt)|}_{PBC(r_i(t+dt))}²>_{i,t}
     msd=0.d0
     do dt = 1, nbTimeStepsInTraj-1
-        PRINT*,"Compute MSD of dt = ",dt," over ",nbTimeStepsInTraj-1
+        if( dt == 1) then
+            call cpu_time(time0)
+        else if( dt == 2) then
+            call cpu_time(time1)
+            print '("Estimated time before end = ",f8.0," mins.")',(time1-time0)*dble(nbTimeStepsInTraj)/60.d0
+        else if( mod(dt,10)==0 ) then
+            print*,"Compute MSD of dt = ",dt," over ",nbTimeStepsInTraj-1
+        end if
         nt = nbTimeStepsInTraj-dt
-!~         rtmp(:,:) = r(:,t,:) - r(:,t+dt,:)
-!~         tmp = sum( rtmp**2 )
         msd(dt) = sum(     (r(:,1:nt,:) - r(:,dt:nt+dt,:))**2         ) /(dble(Nat)*dble(nt))
-!~         do t = 1, nt
-!~             rtmp(:,:) = r(:,t,:) - r(:,t+dt,:)
-!~             tmp = sum( rtmp**2 )
-!~             msd(dt) = msd(dt) + tmp/dble(Nat)
-!~         end do
-!~         msd(dt) = msd(dt) /dble(nt) ! average over reference time t
         write(11,*) dt, msd(dt)
     end do
     

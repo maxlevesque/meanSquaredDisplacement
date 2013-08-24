@@ -7,12 +7,15 @@ program meanSquaredDisplacement
     implicit none
     character(len("msd.out")) :: outputFile = "msd.out"
     integer :: Nat
-    integer :: i, nbTimeStepsInTraj, iostat, dt, t, nt
+    integer :: i, nbTimeStepsInTraj, iostat, dt, t, nt, d
     integer, parameter :: x=1, y=2, z=3
     double precision, dimension(:,:,:), allocatable :: r ! position of site i at timestep t
-    double precision :: tmp, lx, ly, lz
+    double precision :: tmp, lx, ly, lz, diffx, diffy, diffz, rc, tmpp, dx2, dy2, dz2, r0, r1
     double precision, dimension(:), allocatable :: msd
     character(len=300) :: arg, trajectoryFileName
+    double precision, dimension(:,:), allocatable :: rtmp
+    double precision, dimension(x:z) :: l
+    logical :: doagain
 
     ! read all arguments that MUST be given at execution
     call readArguments(lx,ly,lz,Nat,trajectoryFileName)
@@ -28,10 +31,34 @@ program meanSquaredDisplacement
         
     ! read positions of all sites i at all timesteps t
     allocate( r(Nat,nbTimeStepsInTraj,x:z) )
+    allocate( rtmp(Nat,x:z) )
     call opentraj
+    l(x:z) = [lx, ly, lz]
     do t = 1, nbTimeStepsInTraj
+        print*,"Reading and unfolding timestep ",t," over ",nbTimeStepsInTraj
         do i = 1, Nat
             read(10,*) r(i,t,x), r(i,t,y), r(i,t,z)
+            if( t > 1 .and. t < nbTimeStepsInTraj ) then
+                do d = x, z
+                    doagain = .true.
+                    do while (doagain)
+                        doagain = .false.
+                        r0 = r(i,t,d)
+                        r1 = r(i,t+1,d)
+                        if( abs(r0-r1) > l(d)/2.d0 ) then
+                            doagain = .true.
+                            if( r0 > r1 ) then
+                                r1 = r1 + l(d)
+                            else if ( r0 < r1 ) then
+                                r1 = r1 - l(d)
+                            else
+                                STOP "ummmm"
+                            end if
+                        end if
+                        r(i,t+1,d) = r1
+                    end do
+                end do
+            end if
         end do
     end do
     call closetraj
@@ -39,44 +66,193 @@ program meanSquaredDisplacement
     ! MSD(t) will be written in file unit 11
     open(11,file=outputfile)
 
+    rc = (lx**2+ly**2+lz**2)/4.d0
     ! compute msd(dt)= <min{|r_i(t)-r_i(t+dt)|}_{PBC(r_i(t+dt))}²>_{i,t}
     msd=0.d0
     do dt = 1, nbTimeStepsInTraj-1
         nt = nbTimeStepsInTraj-dt
         do t = 1, nt
+            rtmp(:,:) = r(:,t,:) - r(:,t+dt,:)
             tmp = 0.d0
             do i = 1, Nat
-                tmp = tmp + min(    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,ly,lz] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,ly,0.d0] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,ly,-lz] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,lz] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,0.d0] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,0.d0,-lz])**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,lz] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,0.d0] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [lx,-ly,-lz])**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,lz] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,0.d0] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,ly,-lz])**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,lz] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,0.d0] )**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,0.d0,-lz])**2)   ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,lz] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,0.d0] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [0.d0,-ly,-lz])**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,lz] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,0.d0] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,ly,-lz])**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,lz] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,0.d0] )**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,0.d0,-lz])**2)  ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,lz] )**2) ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,0.d0] )**2) ,&
-                                    sum(( r(i,t,:) - r(i,t+dt,:) - [-lx,-ly,-lz])**2)  &
-                                )
+                diffx = rtmp(i,x)
+                diffy = rtmp(i,y)
+                diffz = rtmp(i,z)
+                tmp = tmp + sum(rtmp(i,:)**2)
+
+
+!~                 tmp = tmp + min(    sum(( [diffx,diffy,diffz] + [lx,ly,lz]      )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,ly,0.d0]    )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,ly,-lz]     )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,0.d0,lz]    )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,0.d0,0.d0]  )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,0.d0,-lz]   )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,-ly,lz]     )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,-ly,0.d0]   )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [lx,-ly,-lz]    )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,ly,lz]    )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,ly,0.d0]  )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,ly,-lz]   )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,0.d0,lz]  )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,0.d0,0.d0])**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,0.d0,-lz] )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,-ly,lz]   )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,-ly,0.d0] )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [0.d0,-ly,-lz]  )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,ly,lz]     )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,ly,0.d0]   )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,ly,-lz]    )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,0.d0,lz]   )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,0.d0,0.d0] )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,0.d0,-lz]  )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,-ly,lz]    )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,-ly,0.d0]  )**2)  ,&
+!~                                     sum(( [diffx,diffy,diffz] + [-lx,-ly,-lz]   )**2)   &
+!~                                 )
+
+
+
+                
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,0.d0,0.d0])**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,0.d0,lz]  )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,0.d0,-lz] )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,0.d0,0.d0]  )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,0.d0,0.d0] )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,ly,0.d0]  )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,-ly,0.d0] )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,ly,0.d0]    )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,0.d0,lz]    )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,0.d0,-lz]   )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,-ly,0.d0]   )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,ly,lz]    )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,ly,-lz]   )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,-ly,lz]   )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [0.d0,-ly,-lz]  )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,ly,0.d0]   )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,0.d0,lz]   )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,0.d0,-lz]  )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,-ly,0.d0]  )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,ly,lz]      )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,ly,lz]      )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,ly,-lz]     )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,-ly,lz]     )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [lx,-ly,-lz]    )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,ly,lz]     )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,ly,-lz]    )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~                                 tmpp=sum(( [diffx,diffy,diffz] + [-lx,-ly,lz]    )**2)
+!~                                 if(tmpp<=rc)then
+!~                                     tmp=tmp+tmpp
+!~                                     cycle
+!~                                 end if
+!~ STOP "ERRRG"
+
+
             end do
             msd(dt) = msd(dt) + tmp/dble(Nat)
-!~             sum(  (r(:,t,x)-r(:,t+dt,x))**2 + (r(:,t,y)-r(:,t+dt,y))**2 + (r(:,t,z)-r(:,t+dt,z))**2   )/dble(Nat) ! average over sites i
         end do
         msd(dt) = msd(dt) /dble(nt) ! average over reference time t
         write(11,*) dt, msd(dt)

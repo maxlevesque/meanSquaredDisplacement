@@ -84,6 +84,7 @@ program meanSquaredDisplacement
     allocate(ri(nbTimeStepsInTraj,x:z), source=0.d0)
     msd = 0.d0
     do i= 1, Nat
+        PRINT*,"MSD of atom ",i," over ",Nat
         ri = r(i,:,:)
         do dt = 1, nbTimeStepsInTraj-1
             nt = nbTimeStepsInTraj-dt

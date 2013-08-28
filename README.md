@@ -76,11 +76,13 @@ So, you have to execute:
 
 Execution of `meanSquaredDisplacement` will result in a single file: `msd.out`.  
 This file has a very simple ASCII format:
-    1 1.12931233  
-    2 1.24034134  
-    3 1.5908O123  
-    ...  
-    Nstep 123987.12383  
+``` 
+1 1.12931233  
+2 1.24034134  
+3 1.5908O123  
+...  
+Nstep 123987.12383  
+``` 
 where the first column is the timestep, and the second column is the mean squared displacement.  
 
 ### Units
@@ -94,3 +96,5 @@ This program has been thoroughly tested and validated.
 I would not share a tool that is not production ready. I am very confident in this program.
 *Nevertheless*, this program may contain bugs or restrictions that would lead to unexpected results.
 Please, read carefully this readme file, and test it thoroughly on data for which you already know the results.
+
+Comments, bug reports or even thanks ;) are welcome!

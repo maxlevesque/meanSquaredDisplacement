@@ -10,6 +10,10 @@ It takes the periodic boundary counditions into account.
 Written by *Maximilien Levesque*, while in postdoc in the group of *Mathieu Salanne* at  
 UPMC Univ Paris 06, CNRS, ESPCI, UMR 7195, PECSA, F-75005 Paris, France
 
+## Thanks
+
+Marie Jardat for extensive testing and bug reports of the beta versions.
+
 ## How to compile it
 
 You need to install `scons`, which is a newer and better and easier equivalent to the much complicated `make`.
@@ -67,3 +71,26 @@ The executable is waiting for arguments:
   
 So, you have to execute:  
 `$ meanSquaredDisplacement 56.0 37.43 288.1 800 ./analysis/MSD/positions.out`
+
+## Outputs
+
+Execution of `meanSquaredDisplacement` will result in a single file: `msd.out`.  
+This file has a very simple ASCII format:
+    1 1.12931233  
+    2 1.24034134  
+    3 1.5908O123  
+    ...  
+    Nstep 123987.12383  
+where the first column is the timestep, and the second column is the mean squared displacement.  
+
+### Units
+Both timesteps and mean squared displacement are in units of your simulation.  
+If your trajectory file contains milliseconds (ms) and (Angstroms), `msd.out` will be in `ms Angstroms²`.
+
+
+## Disclaimer
+
+This program has been thoroughly tested and validated.
+I would not share a tool that is not production ready. I am very confident in this program.
+*Nevertheless*, this program may contain bugs or restrictions that would lead to unexpected results.
+Please, read carefully this readme file, and test it thoroughly on data for which you already know the results.

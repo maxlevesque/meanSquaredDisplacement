@@ -7,7 +7,7 @@ It takes the periodic boundary counditions into account.
 
 ## Author
 
-Written by *Maximilien Levesque*, while in postdoc in the group of *Mathieu Salanne* at  
+Written by Maximilien Levesque, while in postdoc in the group of Mathieu Salanne at  
 UPMC Univ Paris 06, CNRS, ESPCI, UMR 7195, PECSA, F-75005 Paris, France
 
 ## Thanks

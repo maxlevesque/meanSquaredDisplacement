@@ -132,6 +132,7 @@ program meanSquaredDisplacement
         character(len=*), parameter :: tmpfilename = "000098767612398712309.TMP"
         cmd="cat "//trim(adjustl(filename))//" | wc -l > "//tmpfilename
         call execute_command_line(trim(adjustl(cmd)), wait=.true.)
+        call inquireFileExistence(tmpfilename)
         open(86,file=tmpfilename)
         read(86,*)NbOfLinesInTraj
         close(86)

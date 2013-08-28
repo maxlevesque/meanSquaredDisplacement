@@ -5,6 +5,12 @@
 Computes the mean squared displacement of particles along a trajectory.
 It takes the periodic boundary counditions into account.
 
+## Background
+
+The purpose of this program is to compute the mean squared displacement (MSD) of a series of equivalent particules that have positions
+that evolve in time.
+
+
 ## Author
 
 Written by Maximilien Levesque, while in postdoc in the group of Mathieu Salanne at  
@@ -60,6 +66,8 @@ You do not print blank lines anywhere. You can add as many spaces you want betwe
 At the end, you *must* have 3 columns and `Nat x Nstep` rows.
 
 That's all you need.
+
+Note that if you have one-dimensional (two-dimensional) positions at each time step, you'll have to add 2 (1) column filled with zero.
 
 ## Execution
 

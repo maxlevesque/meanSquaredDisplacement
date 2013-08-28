@@ -12,7 +12,8 @@ UPMC Univ Paris 06, CNRS, ESPCI, UMR 7195, PECSA, F-75005 Paris, France
 
 ## Thanks
 
-Marie Jardat for extensive testing and bug reports of the beta versions.
+* Marie Jardat, UPMC, PECSA, Paris, France, for discussions, extensive testing and bug reports of the beta (unshared) versions.  
+* Xudong Zhao, UPMC, PECSA, Paris, France, for providing test cases and for discussions.
 
 ## How to compile it
 

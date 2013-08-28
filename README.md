@@ -10,9 +10,12 @@ It takes the periodic boundary counditions into account.
 The purpose of this program is to compute the mean squared displacement (MSD) of a series of equivalent particles that have positions
 evolving in time.
 
-The MSD we calculate is defined as
-[Imgur](http://i.imgur.com/2mvwmPO.jpg)
+The MSD we calculate is defined as  
+<a href="http://imgur.com/2mvwmPO"><img src="http://i.imgur.com/2mvwmPO.jpg?1" title="Hosted by imgur.com" /></a>
+
 where **q** is the three-dimension position vector. It is averaged over all sites, *i*, and origins of time, *t0*.
+
+In a nutshell, the MSD of a time *t* is the ensemble average of the squared Euclidean distance between two positions separated by time *t*
 
 ## Author
 
@@ -27,7 +30,7 @@ UPMC Univ Paris 06, CNRS, ESPCI, UMR 7195, PECSA, F-75005 Paris, France
 ## How to compile it
 
 You need to install `scons`, which is a newer and better and easier equivalent to the much complicated `make`.
-Please visit [the scons website](www.scons.org) for download, or you should better use your repositories.  
+Please visit [the scons website](www.scons.org) for download, or you should better use the repositories of your own distribution:  
 Under Ubuntu: `sudo apt-get install scons`  
 Under Fedora: `sudo yum install scons`  
 and so on for other distros.

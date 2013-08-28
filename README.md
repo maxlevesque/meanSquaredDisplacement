@@ -15,7 +15,7 @@ The MSD we calculate is defined as
 
 where **q** is the three-dimension position vector. It is averaged over all sites, *i*, and origins of time, *t0*.
 
-In a nutshell, the MSD of a time *t* is the ensemble average of the squared Euclidean distance between two positions separated by time *t*
+In a nutshell, the MSD at time *t* is the ensemble average of the squared Euclidean distance between two positions separated by time *t*
 
 ## Author
 

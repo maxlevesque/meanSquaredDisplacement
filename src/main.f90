@@ -19,6 +19,7 @@ program meanSquaredDisplacement
 
     ! read all arguments that MUST be given at execution
     call readArguments(lx,ly,lz,Nat,trajectoryFileName)
+    if( any([lx,ly,lz]<=0.) ) stop "No supercell length should be negative or null. Stop."
 
     ! deduce the number of timesteps in the trajectory from the number of lines in the trajectory file
     nbTimeStepsInTraj = NbOfLinesInTraj()/Nat
@@ -29,35 +30,33 @@ program meanSquaredDisplacement
     ! read positions of all sites i at all timesteps t
     allocate( r(Nat,nbTimeStepsInTraj,x:z) )
     call opentraj
-    l(x:z) = [lx, ly, lz]
     do t = 1, nbTimeStepsInTraj
-        if( mod(t,10)==0 ) print*,"Reading and unfolding timestep ",t," over ",nbTimeStepsInTraj
+        if( mod(t,100)==0 ) print*,"READING timestep ",t," over ",nbTimeStepsInTraj
         do i = 1, Nat
             read(10,*) r(i,t,x), r(i,t,y), r(i,t,z)
-            if( t > 1 .and. t < nbTimeStepsInTraj ) then
-                do d = x, z
-                    doagain = .true.
-                    do while (doagain)
-                        doagain = .false.
-                        r0 = r(i,t,d)
-                        r1 = r(i,t+1,d)
-                        if( abs(r0-r1) > l(d)/2.d0 ) then
-                            doagain = .true.
-                            if( r0 > r1 ) then
-                                r1 = r1 + l(d)
-                            else if ( r0 < r1 ) then
-                                r1 = r1 - l(d)
-                            else
-                                STOP "See loop with while (doagain). Strange behavior."
-                            end if
-                        end if
-                        r(i,t+1,d) = r1
-                    end do
-                end do
-            end if
         end do
     end do
     call closetraj
+
+    l(x:z) = [lx, ly, lz]
+    do t = 1, nbTimeStepsInTraj-1
+        if( mod(t,100)==0 ) print*,"UNFOLDING timestep ",t," over ",nbTimeStepsInTraj
+        do i = 1, Nat
+            do d = x, z
+                r0 = r(i,t,d)
+                r1 = r(i,t+1,d)
+                if( Abs(r0-r1) >= l(d)/2.d0 ) then
+                    if( r0 > r1 ) then
+                        r(i,t+1:,d) = r(i,t+1:,d) + l(d)
+                    else if ( r0 < r1 ) then
+                        r(i,t+1:,d) = r(i,t+1:,d) - l(d)
+                    end if
+                end if
+            end do
+        end do
+    end do
+
+
 
 !~     ! compute msd(dt)= <|r_i(t)-r_i(t+dt)|²>_{i,t}
 
@@ -83,6 +82,7 @@ program meanSquaredDisplacement
     end do
     close(11)
 
+    print*,"-- Everything OK -- Multiorigin powered ;)"
 
     contains
 

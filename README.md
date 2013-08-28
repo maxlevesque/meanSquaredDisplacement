@@ -7,9 +7,12 @@ It takes the periodic boundary counditions into account.
 
 ## Background
 
-The purpose of this program is to compute the mean squared displacement (MSD) of a series of equivalent particules that have positions
-that evolve in time.
+The purpose of this program is to compute the mean squared displacement (MSD) of a series of equivalent particles that have positions
+evolving in time.
 
+The MSD we calculate is defined as
+[Imgur](http://i.imgur.com/2mvwmPO.jpg)
+where **q** is the three-dimension position vector. It is averaged over all sites, *i*, and origins of time, *t0*.
 
 ## Author
 

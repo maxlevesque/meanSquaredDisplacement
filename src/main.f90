@@ -22,7 +22,7 @@ program meanSquaredDisplacement
     if( any([lx,ly,lz]<=0.) ) stop "No supercell length should be negative or null. Stop."
 
     ! deduce the number of timesteps in the trajectory from the number of lines in the trajectory file
-    nbTimeStepsInTraj = NbOfLinesInTraj()/Nat
+    nbTimeStepsInTraj = NbOfLinesInTraj(trajectoryFileName)/Nat
 
     print*,'You have' ,nbTimeStepsInTraj,' time steps in your trajectory file ',trim(adjustl(trajectoryFileName))
     print*,'Please be patient. Everything seems fine... Multiorigin effect! ;)'
@@ -112,17 +112,33 @@ program meanSquaredDisplacement
         end if
     end subroutine
 
-    function NbOfLinesInTraj()
+!~     function NbOfLinesInTraj()
+!~         integer :: NbOfLinesInTraj
+!~         call opentraj
+!~         ! computes the number of lines in traj.in and deduces the number of timesteps
+!~         NbOfLinesInTraj = -1
+!~         do while (iostat == 0)
+!~             read(10,*,iostat=iostat)
+!~             NbOfLinesInTraj = NbOfLinesInTraj + 1
+!~         end do
+!~         call closetraj
+!~     end function
+    
+    
+    function NbOfLinesInTraj(filename)
+        character(len=*), intent(in) :: filename
         integer :: NbOfLinesInTraj
-        call opentraj
-        ! computes the number of lines in traj.in and deduces the number of timesteps
-        NbOfLinesInTraj = -1
-        do while (iostat == 0)
-            read(10,*,iostat=iostat)
-            NbOfLinesInTraj = NbOfLinesInTraj + 1
-        end do
-        call closetraj
+        character(len=180) :: cmd, msg
+        character(len=*), parameter :: tmpfilename = "000098767612398712309.TMP"
+        cmd="cat "//trim(adjustl(filename))//" | wc -l > "//tmpfilename
+        call execute_command_line(trim(adjustl(cmd)), wait=.true.)
+        open(86,file=tmpfilename)
+        read(86,*)NbOfLinesInTraj
+        close(86)
+        call execute_command_line("rm "//tmpfilename)
     end function
+
+    
     
     subroutine readArguments(lx,ly,lz,Nat,trajectoryFileName)
         double precision, intent(out) :: lx, ly, lz

@@ -112,32 +112,33 @@ program meanSquaredDisplacement
         end if
     end subroutine
 
-!~     function NbOfLinesInTraj()
-!~         integer :: NbOfLinesInTraj
-!~         call opentraj
-!~         ! computes the number of lines in traj.in and deduces the number of timesteps
-!~         NbOfLinesInTraj = -1
-!~         do while (iostat == 0)
-!~             read(10,*,iostat=iostat)
-!~             NbOfLinesInTraj = NbOfLinesInTraj + 1
-!~         end do
-!~         call closetraj
-!~     end function
-    
-    
     function NbOfLinesInTraj(filename)
         character(len=*), intent(in) :: filename
         integer :: NbOfLinesInTraj
-        character(len=180) :: cmd, msg
-        character(len=*), parameter :: tmpfilename = "000098767612398712309.TMP"
-        cmd="cat "//trim(adjustl(filename))//" | wc -l > "//tmpfilename
-        call execute_command_line(trim(adjustl(cmd)), wait=.true.)
-        call inquireFileExistence(tmpfilename)
-        open(86,file=tmpfilename)
-        read(86,*)NbOfLinesInTraj
-        close(86)
-        call execute_command_line("rm "//tmpfilename)
+        call opentraj
+        ! computes the number of lines in traj.in and deduces the number of timesteps
+        NbOfLinesInTraj = -1
+        do while (iostat == 0)
+            read(10,*,iostat=iostat)
+            NbOfLinesInTraj = NbOfLinesInTraj + 1
+        end do
+        call closetraj
     end function
+    
+    
+!~     function NbOfLinesInTraj(filename)
+!~         character(len=*), intent(in) :: filename
+!~         integer :: NbOfLinesInTraj
+!~         character(len=180) :: cmd, msg
+!~         character(len=*), parameter :: tmpfilename = "000098767612398712309.TMP"
+!~         cmd="cat "//trim(adjustl(filename))//" | wc -l > "//tmpfilename
+!~         call execute_command_line(trim(adjustl(cmd)), wait=.true.)
+!~         call inquireFileExistence(tmpfilename)
+!~         open(86,file=tmpfilename)
+!~         read(86,*)NbOfLinesInTraj
+!~         close(86)
+!~         call execute_command_line("rm "//tmpfilename)
+!~     end function
 
     
     

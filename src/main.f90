@@ -60,8 +60,10 @@ program meanSquaredDisplacement
 
 !~     ! compute msd(dt)= <|r_i(t)-r_i(t+dt)|²>_{i,t}
 
-    allocate( msd(nbTimeStepsInTraj-1), source=0.d0 )
-    allocate( ri(nbTimeStepsInTraj,x:z), source=0.d0)
+    allocate( msd(nbTimeStepsInTraj-1) )
+    msd = 0.d0
+    allocate( ri(nbTimeStepsInTraj,x:z) )
+    ri = 0.d0
     do i= 1, Nat
         if(i==1) call cpu_time(time0)
         ri = r(i,:,:)

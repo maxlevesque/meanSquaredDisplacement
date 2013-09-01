@@ -72,7 +72,7 @@ program meanSquaredDisplacement
             msd(dt) = msd(dt) + sum( (ri(1:nt,:) - ri(dt:nt+dt,:))**2 ) /dble(nt)
         end do
         call cpu_time(time1)
-        print*,'Estimated remaining time = ',dble(Nat)/dble(i)*dble(Nat-i)/dble(Nat)*(time1-time0)/60.d0,' min'
+        if(mod(i,100)==0) print*,'Estimated remaining time = ',nint(dble(Nat-i)*(time1-time0)/dble(i)/60.d0),' min'
     end do
     msd = msd/dble(Nat)
     deallocate(r,ri)

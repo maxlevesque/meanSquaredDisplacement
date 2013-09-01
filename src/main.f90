@@ -84,7 +84,7 @@ program meanSquaredDisplacement
     end do
     close(11)
 
-    print*,"-- Everything OK -- Multiorigin powered ;)"
+    print*,"-- Everything OK -- ;)"
 
     contains
 

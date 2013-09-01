@@ -31,7 +31,7 @@ program meanSquaredDisplacement
     allocate( r(Nat,nbTimeStepsInTraj,x:z) )
     call opentraj
     do t = 1, nbTimeStepsInTraj
-        if( mod(t,100)==0 ) print*,"READING timestep ",t," over ",nbTimeStepsInTraj
+        if( mod(t,1000)==1 ) print*,"READING timestep ",t," over ",nbTimeStepsInTraj
         do i = 1, Nat
             read(10,*) r(i,t,x), r(i,t,y), r(i,t,z)
         end do
@@ -40,7 +40,7 @@ program meanSquaredDisplacement
 
     l(x:z) = [lx, ly, lz]
     do t = 1, nbTimeStepsInTraj-1
-        if( mod(t,100)==0 ) print*,"UNFOLDING timestep ",t," over ",nbTimeStepsInTraj
+        if( mod(t,1000)==1 ) print*,"UNFOLDING timestep ",t," over ",nbTimeStepsInTraj
         do i = 1, Nat
             do d = x, z
                 r0 = r(i,t,d)
@@ -64,15 +64,15 @@ program meanSquaredDisplacement
     msd = 0.d0
     allocate( ri(nbTimeStepsInTraj,x:z) )
     ri = 0.d0
+    call cpu_time(time0)
     do i= 1, Nat
-        if(i==1) call cpu_time(time0)
         ri = r(i,:,:)
         do dt = 1, nbTimeStepsInTraj-1
             nt = nbTimeStepsInTraj-dt
             msd(dt) = msd(dt) + sum( (ri(1:nt,:) - ri(dt:nt+dt,:))**2 ) /dble(nt)
         end do
         call cpu_time(time1)
-        if(mod(i,100)==0) print*,'Estimated remaining time = ',nint(dble(Nat-i)*(time1-time0)/dble(i)/60.d0),' min'
+        if(mod(i,100)==1) print*,'Estimated remaining time = ',nint(dble(Nat-i)*(time1-time0)/dble(i)/60.d0),' min'
     end do
     msd = msd/dble(Nat)
     deallocate(r,ri)

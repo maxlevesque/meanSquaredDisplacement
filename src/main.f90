@@ -69,7 +69,7 @@ program meanSquaredDisplacement
         ri = r(i,:,:)
         do dt = 1, nbTimeStepsInTraj-1
             nt = nbTimeStepsInTraj-dt
-            msd(dt) = msd(dt) + sum( (ri(1:nt,:) - ri(dt:nt+dt,:))**2 ) /dble(nt)
+            msd(dt) = msd(dt) + sum( (ri(1:nt,:) - ri(1+dt:nt+dt,:))**2 ) /dble(nt)
         end do
         call cpu_time(time1)
         if(mod(i,100)==1) print*,'Estimated remaining time = ',nint(dble(Nat-i)*(time1-time0)/dble(i)/60.d0),' min'

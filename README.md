@@ -78,7 +78,7 @@ Note that if you have one-dimensional (two-dimensional) positions at each time s
 ## Execution
 
 The executable is waiting for arguments:  
-1. `Lz`, the length of the supercell in *x* direction, in the same units as the positions  
+1. `Lx`, the length of the supercell in *x* direction, in the same units as the positions  
 2. `Ly`  
 3. `Lz`  
 4. `Nat`, defined above  
